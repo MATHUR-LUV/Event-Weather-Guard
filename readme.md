@@ -21,8 +21,8 @@ Event Weather Guard is a professional backend service for event organizers. It a
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/your-username/event-weather-guard.git
-cd event-weather-guard
+git clone https://github.com/MATHUR-LUV/Event-Weather-Guard.git
+cd Event-Weather-Guard
 ```
 
 2. **Launch with Docker Compose**
@@ -32,7 +32,7 @@ docker-compose up --build
 ```
 
 3. **Access the service**
-    - **API Endpoint**: http://localhost:8000/event-forecast
+    - **API Endpoint**: POST : http://localhost:8000/event-forecast
     - **Swagger Docs**: http://localhost:8000/docs
 
 ### 🧪 Option 2: Local Development (Python)
