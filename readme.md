@@ -34,6 +34,11 @@ docker-compose up --build
     - **API Endpoint**: POST : http://localhost:8000/event-forecast
     - **Swagger Docs**: http://localhost:8000/docs
 
+4. **Test the Application**
+
+```bash
+docker compose exec event-weather-guard python -m pytest
+```
 ### 🧪 Option 2: Local Development (Python)
 
 1. **Install dependencies**
