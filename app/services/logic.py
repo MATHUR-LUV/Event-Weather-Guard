@@ -1,5 +1,7 @@
 from typing import List, Dict
 from app.schemas import ForecastHour
+
+
 # WMO Weather interpretation codes (WW)
 WMO_CODES = {
     0: "Clear sky",
@@ -22,6 +24,7 @@ def evaluate_risk(forecasts: List[ForecastHour]) -> Dict:
     
     for hour in forecasts:
         # Rule: Unsafe (Thunderstorms or Severe Wind)
+        # 1. Thunderstorms (WMO greater than 95)
         if hour.condition_code >= 95:
             reasons.add(f"Thunderstorm ({hour.condition_desc}) at {hour.time}")
             level = "Unsafe"
@@ -36,7 +39,7 @@ def evaluate_risk(forecasts: List[ForecastHour]) -> Dict:
             reasons.add(f"Dangerous winds ({hour.wind_kmh} km/h) at {hour.time}")
             level = "Unsafe"
 
-        # --- ⚠️ RISKY RULES (If not already Unsafe) ---
+        # RISKY RULES (If not already Unsafe)
         if level != "Unsafe":
             # 1. High Probability
             if hour.rain_prob > 60:

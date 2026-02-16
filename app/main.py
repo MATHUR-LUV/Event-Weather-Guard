@@ -8,10 +8,8 @@ app = FastAPI(title="Event Weather Guard")
 
 @app.post("/event-forecast", response_model=WeatherAdvisory)
 async def analyze_event_weather(event: EventRequest):
-    # 1. Get raw data
     raw_data = await fetch_weather_data(event.location)
-    
-    # 2. Extract hours within the event window
+
     event_window = []
     for i, time_str in enumerate(raw_data["time"]):
         forecast_time = datetime.fromisoformat(time_str)
@@ -29,6 +27,5 @@ async def analyze_event_weather(event: EventRequest):
     if not event_window:
         raise HTTPException(status_code=400, detail="Requested time window is out of forecast range.")
 
-    # 3. Classify and Return
     analysis = evaluate_risk(event_window)
     return {**analysis, "event_window_forecast": event_window}
