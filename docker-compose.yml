@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  event-weather-guard:
+    build: .
+    container_name: event_weather_service
+    ports:
+      - "8000:8000"
+    # This allows you to edit code locally and see changes in the container instantly
+    volumes:
+      - .:/app
+    environment:
+      - APP_ENV=production
+    restart: always
