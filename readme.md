@@ -146,4 +146,42 @@ The system evaluates every hour within the event window. If any hour triggers a 
 - **Weather Source**: Open-Meteo API
 - **Containerization**: Docker \& Docker Compose
 
+
+## 🧪 Advanced Analytics Logic
+
+### 1. Severity Scoring (0–100)
+The service calculates a **cumulative risk score** for every hour of the event. Unlike a simple binary check, this model accounts for the interaction between different weather variables.
+
+**The Calculation Formula:**
+* **Base Condition:** * Thunderstorms: **80 pts**
+    * Heavy/Violent Rain: **70 pts**
+    * Moderate Rain/Showers: **40 pts**
+    * Cloudy/Light Drizzle: **15 pts**
+* **Wind Penalty:** Adds up to **+20 pts** (calculated as `(Wind Speed / 50km/h) * 20`).
+* **Confidence Penalty:** Adds up to **+10 pts** based on the precipitation probability.
+
+
+
+*Example: A Thunderstorm (80) with 25km/h wind (+10) and 80% probability (+8) results in a Severity Score of **98/100**.*
+
+---
+
+### 2. Smart Recommendation Engine
+If an event is classified as **Risky** or **Unsafe**, the service automatically triggers a "Window Scan" to help organizers pivot.
+
+1.  **Duration Locking:** The engine identifies the exact duration of your requested event (e.g., 3 hours).
+2.  **24-Hour Scan:** It shifts the start time forward, one hour at a time, for the next 24 hours.
+3.  **Safety Validation:** For each new potential window, it re-runs the full 0–100 severity analysis.
+4.  **First-Available Match:** The first window that achieves a **Safe** classification is returned in the `recommendation` field.
+
+
+
+---
+
+### 📉 Decision Thresholds
+| Severity Score | Classification | Action Recommended |
+| :--- | :--- | :--- |
+| **80 - 100** | ❌ **Unsafe** | Cancel or move to an indoor venue immediately. |
+| **35 - 79** | ⚠️ **Risky** | Prepare a backup plan; expect delays or minor disruptions. |
+| **0 - 34** | ✅ **Safe** | Proceed with outdoor setup as planned. |
 ***
