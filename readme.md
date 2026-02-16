@@ -11,7 +11,6 @@ Event Weather Guard is a professional backend service for event organizers. It a
 - ⚡ **Fast and stateless API**
 - 🐳 **Docker-ready deployment**
 - 📚 **Auto-generated Swagger docs**
-- 🔍 **Health check endpoint**
 
 
 ## 🚀 Setup \& Installation
