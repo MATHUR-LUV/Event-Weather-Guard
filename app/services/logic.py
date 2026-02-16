@@ -18,41 +18,68 @@ WMO_CODES = {
 def get_condition_description(code: int) -> str:
     return WMO_CODES.get(code, "Unknown Weather")
 
+
+def calculate_severity(hour: ForecastHour) -> int:
+    score = 0
+
+    # 1. Base Score from WMO Codes (Condition Tier)
+    if hour.condition_code >= 95: # Thunderstorms
+        score = 80
+    elif hour.condition_code in [65, 82]: # Heavy/Violent Rain
+        score = 70
+    elif hour.condition_code in [61, 63, 80, 81]: # Moderate Rain
+        score = 40
+    elif hour.condition_code >= 1: # Cloudy/Light Drizzle
+        score = 15
+    else: # Clear
+        score = 0
+
+    # 2. Add Wind Penalty (Max +20 points)
+    # 50km/h is our dangerous threshold. 
+    # We add 4 points for every 10km/h of wind.
+    wind_penalty = (hour.wind_kmh / 50) * 20
+    score += wind_penalty
+
+    # 3. Add Rain Probability Penalty (Max +10 points)
+    # This adds weight to how "certain" the bad weather is.
+    prob_penalty = (hour.rain_prob / 100) * 10
+    score += prob_penalty
+
+    # 4. Final Cap
+    # We ensure the score doesn't exceed 100.
+    return int(min(score, 100))
+
+
 def evaluate_risk(forecasts: List[ForecastHour]) -> Dict:
     reasons = set()
     level = "Safe"
+    max_severity = 0
     
     for hour in forecasts:
-        # Rule: Unsafe (Thunderstorms or Severe Wind)
-        # 1. Thunderstorms (WMO greater than 95)
-        if hour.condition_code >= 95:
-            reasons.add(f"Thunderstorm ({hour.condition_desc}) at {hour.time}")
-            level = "Unsafe"
-            
-        # 2. Heavy/Violent Rain (WMO 65, 82)
-        elif hour.condition_code in [65, 82]:
-            reasons.add(f"Extreme/Heavy rain ({hour.condition_desc}) at {hour.time}")
-            level = "Unsafe"
-            
-        # 3. Dangerous Wind
-        elif hour.wind_kmh > 50:
-            reasons.add(f"Dangerous winds ({hour.wind_kmh} km/h) at {hour.time}")
-            level = "Unsafe"
+        sev = calculate_severity(hour)
+        if sev > max_severity:
+            max_severity = sev
 
-        # RISKY RULES (If not already Unsafe)
-        if level != "Unsafe":
-            # 1. High Probability
+        # --- ❌ UNSAFE CHECK ---
+        # Triggered by high severity (100) or specific dangerous WMO codes
+        if sev >= 80:
+            level = "Unsafe"
+            if hour.condition_code >= 95:
+                reasons.add(f"Thunderstorm ({hour.condition_desc}) at {hour.time}")
+            elif hour.condition_code in [65, 82]:
+                reasons.add(f"Extreme/Heavy rain ({hour.condition_desc}) at {hour.time}")
+            elif hour.wind_kmh > 50:
+                reasons.add(f"Dangerous winds ({hour.wind_kmh} km/h) at {hour.time}")
+        
+        # --- ⚠️ RISKY CHECK (Only if the overall event isn't already Unsafe) ---
+        elif level != "Unsafe" and sev >= 35:
+            level = "Risky"
             if hour.rain_prob > 60:
                 reasons.add(f"High rain probability ({hour.rain_prob}%) at {hour.time}")
-                level = "Risky"
-            # 2. Moderate Wind
-            elif 30 <= hour.wind_kmh <= 50:
+            elif hour.wind_kmh >= 30:
                 reasons.add(f"Strong winds ({hour.wind_kmh} km/h) at {hour.time}")
-                level = "Risky"
-            # 3. Moderate Rain/Drizzle (WMO 51-63, 80-81)
             elif (51 <= hour.condition_code <= 63) or (80 <= hour.condition_code <= 81):
                 reasons.add(f"Rain expected ({hour.condition_desc}) at {hour.time}")
-                level = "Risky"
 
     summaries = {
         "Unsafe": "Event should be cancelled or moved indoors due to severe conditions.",
@@ -62,6 +89,7 @@ def evaluate_risk(forecasts: List[ForecastHour]) -> Dict:
 
     return {
         "classification": level,
+        "severity_score": max_severity,
         "summary": summaries[level],
         "reason": list(reasons)
     }

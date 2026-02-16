@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 class Location(BaseModel):
     latitude: float
@@ -24,3 +24,5 @@ class WeatherAdvisory(BaseModel):
     summary: str
     reason: List[str]
     event_window_forecast: List[ForecastHour]
+    recommendation: Optional[str] = None
+    severity_score: int
