@@ -60,7 +60,7 @@ def evaluate_risk(forecasts: List[ForecastHour]) -> Dict:
         if sev > max_severity:
             max_severity = sev
 
-        # --- ❌ UNSAFE CHECK ---
+        # UNSAFE CHECK
         # Triggered by high severity (100) or specific dangerous WMO codes
         if sev >= 80:
             level = "Unsafe"
@@ -71,7 +71,7 @@ def evaluate_risk(forecasts: List[ForecastHour]) -> Dict:
             elif hour.wind_kmh > 50:
                 reasons.add(f"Dangerous winds ({hour.wind_kmh} km/h) at {hour.time}")
         
-        # --- ⚠️ RISKY CHECK (Only if the overall event isn't already Unsafe) ---
+        # RISKY CHECK (Only if the overall event isn't already Unsafe) 
         elif level != "Unsafe" and sev >= 35:
             level = "Risky"
             if hour.rain_prob > 60:
