@@ -131,7 +131,7 @@ The system evaluates every hour within the event window. If any hour triggers a 
 | **📅 Forecast Horizon** | Designed for events within the next **7–10 days**. Requests too far in past/future return `400 Bad Request` |
 | **🔢 Deterministic Logic** | Uses fixed thresholds for consistency. Easily configurable for event-specific sensitivity (e.g., kite festivals are more wind-sensitive) |
 | **🧩 Stateless Design** | No database used. No event persistence. **Highly scalable and lightweight** |
-| **🌐 API Dependency** | Uses [Open-Meteo public API](https://open-meteo.com/). Includes `/health` endpoint for monitoring |
+| **🌐 API Dependency** | Uses [Open-Meteo public API](https://open-meteo.com/).
 
 ## 🛠️ Tech Stack
 
